@@ -1,1 +1,1 @@
-# fingerprint indoor tracking system
+# Fingerprint indoor tracking system
