@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Indoor Tracking Visualization</title>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f4f4f4; /* Optional: Adds a light background */
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    canvas {
+      border: 1px solid black;
+      width: 1000px; /* Display size */
+      height: 550px; /* Display size */
+    }
+  </style>
+</head>
+<body>
+  <h1>Indoor Tracking Visualization</h1>
+  <canvas id="trackingCanvas" width="302" height="140"></canvas>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const canvas = document.getElementById('trackingCanvas');
+    const ctx = canvas.getContext('2d');
+    const socket = io();
+
+    socket.on('updateCanvas', (data) => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const { stationaryDevice, bleData } = data;
+
+      // Draw stationary device
+      ctx.fillStyle = 'blue';
+      ctx.beginPath();
+      ctx.arc(stationaryDevice.x, stationaryDevice.y, 10, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillText('Stationary ESP32', stationaryDevice.x + 15, stationaryDevice.y - 10);
+
+      // Draw mobile devices
+      ctx.fillStyle = 'red';
+      for (const device in bleData) {
+        const position = bleData[device].position;
+        if (position) {
+          ctx.beginPath();
+          ctx.arc(position.x, position.y, 10, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillText(device, position.x + 15, position.y - 10);
+
+          // Draw line to stationary device
+          ctx.strokeStyle = 'gray';
+          ctx.beginPath();
+          ctx.moveTo(stationaryDevice.x, stationaryDevice.y);
+          ctx.lineTo(position.x, position.y);
+          ctx.stroke();
+
+          // Display distance
+          const distance = Math.sqrt(
+            Math.pow(position.x - stationaryDevice.x, 2) +
+            Math.pow(position.y - stationaryDevice.y, 2)
+          ) / 100; // Scale back to meters
+          ctx.fillText(`${distance.toFixed(2)} m`, (position.x + stationaryDevice.x) / 2, (position.y + stationaryDevice.y) / 2);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
