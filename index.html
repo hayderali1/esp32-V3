@@ -5,31 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Indoor Tracking Visualization</title>
   <style>
-    body {
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background-color: #f4f4f4; /* Optional: Adds a light background */
-    }
-
-    h1 {
-      margin-bottom: 20px;
-      text-align: center;
-    }
-
     canvas {
       border: 1px solid black;
-      width: 1000px; /* Display size */
-      height: 550px; /* Display size */
     }
   </style>
 </head>
 <body>
   <h1>Indoor Tracking Visualization</h1>
-  <canvas id="trackingCanvas" width="302" height="140"></canvas>
+  <canvas id="trackingCanvas" width="800" height="370"></canvas>
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const canvas = document.getElementById('trackingCanvas');
@@ -37,42 +20,66 @@
     const socket = io();
 
     socket.on('updateCanvas', (data) => {
+      // Clear the canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       const { stationaryDevice, bleData } = data;
 
+      // Coordinate scaling factors
+      const scaleX = canvas.width / 302;
+      const scaleY = canvas.height / 140;
+
+      // Function to map and invert y-coordinate
+      const invertY = (y) => canvas.height - (y * scaleY);
+
       // Draw stationary device
+      const stationaryX = stationaryDevice.x * scaleX;
+      const stationaryY = invertY(stationaryDevice.y);
       ctx.fillStyle = 'blue';
       ctx.beginPath();
-      ctx.arc(stationaryDevice.x, stationaryDevice.y, 10, 0, Math.PI * 2);
+      ctx.arc(stationaryX, stationaryY, 10, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillText('Stationary ESP32', stationaryDevice.x + 15, stationaryDevice.y - 10);
+      ctx.fillText('Stationary ESP32', stationaryX + 15, stationaryY - 10);
 
-      // Draw mobile devices
+      // Draw other devices
       ctx.fillStyle = 'red';
       for (const device in bleData) {
         const position = bleData[device].position;
         if (position) {
+          const mobileX = position.x * scaleX;
+          const mobileY = invertY(position.y);
           ctx.beginPath();
-          ctx.arc(position.x, position.y, 10, 0, Math.PI * 2);
+          ctx.arc(mobileX, mobileY, 10, 0, Math.PI * 2);
           ctx.fill();
-          ctx.fillText(device, position.x + 15, position.y - 10);
+          ctx.fillText(device, mobileX + 15, mobileY - 10);
 
           // Draw line to stationary device
           ctx.strokeStyle = 'gray';
           ctx.beginPath();
-          ctx.moveTo(stationaryDevice.x, stationaryDevice.y);
-          ctx.lineTo(position.x, position.y);
+          ctx.moveTo(stationaryX, stationaryY);
+          ctx.lineTo(mobileX, mobileY);
           ctx.stroke();
 
           // Display distance
           const distance = Math.sqrt(
-            Math.pow(position.x - stationaryDevice.x, 2) +
-            Math.pow(position.y - stationaryDevice.y, 2)
-          ) / 100; // Scale back to meters
-          ctx.fillText(`${distance.toFixed(2)} m`, (position.x + stationaryDevice.x) / 2, (position.y + stationaryDevice.y) / 2);
+            Math.pow(mobileX - stationaryX, 2) +
+            Math.pow(mobileY - stationaryY, 2)
+          ) / scaleX; // Convert back to original units
+          ctx.fillText(`${distance.toFixed(2)} cm`, (mobileX + stationaryX) / 2, (mobileY + stationaryY) / 2);
         }
       }
+
+      // Draw reference rectangle
+      ctx.strokeStyle = 'black';
+      ctx.setLineDash([5, 5]); // Dashed line
+      ctx.strokeRect(0, 0, canvas.width, canvas.height);
+
+      // Draw middle line
+      const middleY = canvas.height / 2;
+      ctx.beginPath();
+      ctx.moveTo(0, middleY);
+      ctx.lineTo(canvas.width, middleY);
+      ctx.stroke();
     });
   </script>
 </body>
