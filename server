@@ -43,10 +43,8 @@ const fingerprintDatabase = [
   { x: 0, y: 0, rssi: -62 },       // N
 ];
 
-
 // Function to calculate weighted position from fingerprint database
 function calculateWeightedPosition(rssi, k = 3) {
-  // Step 1: Compute weights based on RSSI difference
   const weightedPositions = fingerprintDatabase.map((fingerprint) => {
     const weight = 1 / Math.abs(fingerprint.rssi - rssi); // Inverse of the difference
     return {
@@ -56,13 +54,10 @@ function calculateWeightedPosition(rssi, k = 3) {
     };
   });
 
-  // Step 2: Sort by weight (highest weight = closest match)
   weightedPositions.sort((a, b) => b.weight - a.weight);
 
-  // Step 3: Take the top-k closest fingerprints
   const topK = weightedPositions.slice(0, k);
 
-  // Step 4: Calculate the weighted average position
   let totalWeight = 0;
   let weightedX = 0;
   let weightedY = 0;
@@ -116,7 +111,14 @@ app.post('/update-location', (req, res) => {
 
   if (position) {
     bleData[device].position = position;
-    console.log(`Updated position for ${device}: (${position.x}, ${position.y})`);
+
+    // Calculate distance from stationary ESP32 to the device
+    const distance = Math.sqrt(
+      Math.pow(position.x - stationaryDevice.x, 2) +
+      Math.pow(position.y - stationaryDevice.y, 2)
+    );
+
+    console.log(`Updated position for ${device}: (${position.x}, ${position.y}), Distance from stationary: ${distance.toFixed(2)} units`);
   } else {
     console.log(`No matching fingerprint found for ${device}`);
   }
