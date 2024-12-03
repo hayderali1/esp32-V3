@@ -80,7 +80,7 @@ And so on...
 
 Results:
 
-Error 	        CDF
+Error 	                            CDF
 28.85	          0.11
 28.85	          0.22
 32.36          	0.33
