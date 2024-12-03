@@ -35,50 +35,65 @@ fingerprintDatabase
 ];
 
 
--in this part our target ıs evaluate the Cdf graph 
+
+-In this part our target ıs evaluate the Cdf graph 
 
 Step-by-Step CDF Calculation
 
-Input Data:
+## 1-Input Data:
 Errors are extracted from the dataset.
 
-Sort the Errors:
+## 2-Sort the Errors:
 Arrange the error values in ascending order.
 
-Compute CDF Values:
+## 3-Compute CDF Values:
 For each sorted error Ei, calculate:
 
 CDF(Ei) = Rank of Ei / Total Number of Errors
 
 where the rank is the 1-based index of Ei in the sorted list.
 
-Example for the Provided Data:
 
-Errors from Dataset:
+
+## Example for the Provided Data:
+
+## Errors from Dataset:
+
 
 50.41, 32.36, 28.85, 32.74, 36.00, 50.41, 28.85, 40.00, 58.85
 
-Sort the Errors:
+
+## Sort the Errors:
+
 
 Sorted Errors: [28.85, 28.85, 32.36, 32.74, 36.00, 40.00, 50.41, 50.41, 58.85]
 
-Compute CDF Values:
+
+
+## Compute CDF Values:
+
 
 For 28.85 (1st and 2nd occurrences):
 
+
 CDF = 1/9 = 0.11 and CDF = 2/9 = 0.22
+
 
 For 32.36 (3rd):
 
 CDF = 3/9 = 0.33
 
+
 For 32.74 (4th):
 
 CDF = 4/9 = 0.44
 
+
 And so on...
 
-Results:
+
+## Results:
+
 
 | Error | CDF  |
 |-------|------|
@@ -91,6 +106,7 @@ Results:
 | 50.41 | 0.78 |
 | 50.41 | 0.89 |
 | 58.85 | 1.00 |
+
 
 
 Explanation of Results:
