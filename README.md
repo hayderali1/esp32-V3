@@ -6,6 +6,7 @@ Refer to volume 2 for further understanding of the used fingerprint technique me
 
 fingerprintDatabase 
 
+
 = [
   { x: 302, y: 140, rssi: -61 }, // A
   
